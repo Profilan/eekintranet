@@ -1,0 +1,105 @@
+<?php 
+if (isset($filters['department'])) {
+    $dept = $filters['department'];
+} else {
+    $dept = '';
+}
+
+$flash = $this->flashMessenger();
+$flash->setMessageOpenFormat('<div%s>
+     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+         &times;
+     </button>
+     <ul><li>')
+     ->setMessageSeparatorString('</li><li>')
+     ->setMessageCloseString('</li></ul></div>');
+
+     echo $flash->render('error',   array('alert', 'alert-dismissible', 'alert-danger'));
+     echo $flash->render('info',    array('alert', 'alert-dismissible', 'alert-info'));
+     echo $flash->render('default', array('alert', 'alert-dismissible', 'alert-warning'));
+     echo $flash->render('success', array('alert', 'alert-dismissible', 'alert-success'));
+
+?>
+
+<h2>Medewerkers</h2>
+
+<form id="form-medewerkers" method="post" action="<?php echo $this->url('pro-user', array('action' => 'index')); ?>">
+
+    <div class="well">
+    	<div class="row">
+        	<div class="col-md-3">
+            	<select class="form-control" name="deptnl" id="deptnl">
+            		<option value="">- Kies een afdeling -</option>
+            		<?php foreach ($this->departments as $department) : ?>
+            		<option value="<?php echo $department->getDescriptionNl(); ?>" <?php echo $dept == $department->getDescriptionNl() ? 'selected' : ''; ?>><?php echo $department->getDescriptionNl(); ?></option>
+            		<?php endforeach; ?>
+            	</select>
+        	</div>
+        	<div class="col-md-9">
+        		<div class="row">
+        			<div class="col-md-3">
+        				<input class="form-control" name="employee" id="employee">
+        			</div>
+        			<div class="col-md-3">
+        				<button class="btn btn-default">Zoeken</button>
+        			</div>
+        		</div>
+        	</div>
+    	</div>
+    </div>
+    
+    <table class="table">
+    	<thead>
+    		<tr>
+    			<th>&nbsp;</th>
+    			<th>Naam</th>
+    			<th>E-mail</th>
+    			<th>Telefoon</th>
+    		</tr>
+    	</thead>
+    	<tbody>
+    		<?php foreach ($this->users as $user) : ?>
+    		
+    		<?php if (($this->isMemberOf($user, 'GEveryoneDeEekhoorn') || $this->isMemberOf($user, 'GEveryoneBasiclabel')) && $user->getEnabled() && !$this->isMemberOf($user, 'GHideFromIntranet')) : ?>
+    		<tr>
+    			<td>
+    				<div style="width: 60px; height: 80px; overflow: hidden;">
+                	<?php if ($user->getJpegphoto()) : ?>
+                	<?php echo '<img src="data:image/jpeg;base64,'.$user->getPhoto().'" style="height: 80px;" />';?>
+                	<?php else : ?>
+                	<img src="<?php echo $this->basePath('img/person-placeholder.png'); ?>" style="height: 80px;" />
+                	<?php endif; ?>
+                	</div>
+    			</td>
+    			<td>
+    				<a href="<?php echo $this->url('pro-user', array('action' => 'edit', 'id' => $user->getUserprincipalname())); ?>" data-id="<?php echo $user->getUserprincipalname()?>"><?php echo $user->getDisplayname(); ?></a><br>
+    				<?php echo $user->getDepartmentNl(); ?>
+    			</td>
+    			<td><a href="mailto:<?php echo $user->getMail(); ?>"><?php echo $user->getMail(); ?></a></td>
+    			<td>
+    				<?php if ($user->getTelephonenumber() != '+31 (0)' && $user->getTelephonenumber() != '') : ?>
+    				T <a href="tel:<?php echo $user->getTelephonenumber(); ?>"><?php echo $user->getTelephonenumber(); ?></a><br>
+    				<?php endif; ?>
+    				<?php if ($user->getMobile() != '') : ?>
+    				M <a href="tel:<?php echo $user->getMobile(); ?>"><?php echo $user->getMobile(); ?></a>
+    				<?php endif; ?>
+    			</td>
+    		</tr>
+    		<?php endif; ?>
+    		<?php endforeach; ?>
+    	</tbody>
+    </table>
+
+</form>
+
+<script type="text/javascript">
+$( document ).ready(function() {
+
+	$('#deptnl').change(function() {
+		$('#form-medewerkers').submit();
+	});
+
+	
+	
+});
+</script>

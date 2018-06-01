@@ -1,0 +1,45 @@
+<?php
+$title = 'Inloggen';
+$this->headTitle($title);
+
+$form = $this->form;
+$form->prepare();
+
+$form->setAttribute('action', $this->url('pro-user', array('action' => 'login')));
+
+// Set the method attribute for the form
+$form->setAttribute('method', 'post');
+
+// Set the class for the form
+$form->setAttribute('class', 'form-login');
+
+// Get the form label plugin
+$formLabel = $this->plugin('formLabel');
+
+// Render the opening tag
+echo $this->form()->openTag($form);
+?>
+<h2><?php echo $this->escapeHtml($title); ?></h2>
+<div class="form-group">
+    <?php 
+    $username = $form->get('username');
+    echo $this->formLabel($username);
+    echo $this->formInput($username);
+    echo $this->formElementErrors($username);
+    ?>
+</div>
+
+<div class="form-group">
+    <?php 
+    $password = $form->get('password');
+    echo $this->formLabel($password);
+    echo $this->formInput($password);
+    echo $this->formElementErrors($password);
+    ?>
+</div>
+
+<?php echo $this->formSubmit($form->get('submit')); ?>
+
+<?php 
+echo $this->form()->closeTag();
+?>

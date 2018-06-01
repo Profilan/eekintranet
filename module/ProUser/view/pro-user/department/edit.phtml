@@ -1,0 +1,63 @@
+<?php
+$title = 'Afdeling bewerken';
+$this->headTitle($title);
+
+$form = $this->form;
+$form->prepare();
+
+$form->setAttribute('action', $this->url('pro-department', array('action' => 'edit', 'id' => $this->id)));
+
+// Set the method attribute for the form
+$form->setAttribute('method', 'post');
+
+// Set the class for the form
+$form->setAttribute('class', 'form-standard');
+
+// Get the form label plugin
+$formLabel = $this->plugin('formLabel');
+
+// Render the opening tag
+echo $this->form()->openTag($form);
+?>
+<h2><?php echo $this->escapeHtml($title); ?></h2>
+<div class="form-group">
+    <?php 
+    $descriptionNl = $form->get('department')->get('descriptionNl');
+    echo $this->formLabel($descriptionNl);
+    echo $this->formInput($descriptionNl);
+    echo $this->formElementErrors($descriptionNl);
+    ?>
+</div>
+
+<div class="form-group">
+    <?php 
+    $descriptionEn = $form->get('department')->get('descriptionEn');
+    echo $this->formLabel($descriptionEn);
+    echo $this->formInput($descriptionEn);
+    echo $this->formElementErrors($descriptionEn);
+    ?>
+</div>
+
+<div class="form-group">
+    <?php 
+    $descriptionDe = $form->get('department')->get('descriptionDe');
+    echo $this->formLabel($descriptionDe);
+    echo $this->formInput($descriptionDe);
+    echo $this->formElementErrors($descriptionDe);
+    ?>
+</div>
+
+<div class="form-group">
+    <?php 
+    $signatureSet = $form->get('department')->get('signatureSet');
+    echo $this->formLabel($signatureSet);
+    echo $this->formSelect($signatureSet);
+    echo $this->formElementErrors($signatureSet);
+    ?>
+</div>
+
+<?php echo $this->formSubmit($form->get('submit')); ?>
+
+<?php 
+echo $this->form()->closeTag();
+?>

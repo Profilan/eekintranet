@@ -1,0 +1,334 @@
+<?php 
+
+use ProUser\Entity\User;
+
+echo $this->headScript()->prependFile($this->basePath('js/jquery.mask.min.js'), 'text/javascript');
+echo $this->headScript()->prependFile($this->basePath('js/jquery.validate.min.js'), 'text/javascript');
+echo $this->headScript()->prependFile($this->basePath('js/chosen.jquery.min.js'), 'text/javascript');
+
+/**
+ *
+ * @var User $user
+ */
+$user = $this->user;
+
+$signatureSet = '';
+foreach ($this->departments as $department) {
+    if ($user->getDepartmentNl() == $department->getDescriptionNl()) {
+        switch ($department->getSignatureSet()) {
+            case 'ExclaimerEekhoornZaadmarkt':
+                $signatureSet = 'Eekhoorn Zaadmarkt';
+                break;
+            case 'ExclaimerEekhoornMarktweg':
+                $signatureSet = 'Eekhoorn Marktweg';
+                break;
+            case 'ExclaimerBasiclabelMarktweg':
+                $signatureSet = 'Basiclabel Marktweg';
+                break;
+            case 'ExclaimerBasiclabelWinkel':
+                $signatureSet = 'Basiclabel Winkel';
+                break;
+            default:
+                $signatureSet = '';
+                break;
+        }
+        continue;
+    }
+}
+
+// Dial code
+$phoneNumberArr = explode(' ', $user->getTelephonenumber());
+$phoneDialCode = $phoneNumberArr[0];
+$phoneNumber = '';
+for ($i = 1; $i < count($phoneNumberArr); $i++) {
+    $phoneNumber .= $phoneNumberArr[$i];
+}
+$mobileNumberArr = explode(' ', $user->getMobile());
+$mobileDialCode = $mobileNumberArr[0];
+$mobile = '';
+for ($i = 1; $i < count($mobileNumberArr); $i++) {
+    $mobile .= $mobileNumberArr[$i];
+}
+
+ $flash = $this->flashMessenger();
+ $flash->setMessageOpenFormat('<div%s>
+     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+         &times;
+     </button>
+     <ul><li>')
+     ->setMessageSeparatorString('</li><li>')
+     ->setMessageCloseString('</li></ul></div>');
+
+ echo $flash->render('error',   array('alert', 'alert-dismissible', 'alert-danger'));
+ echo $flash->render('info',    array('alert', 'alert-dismissible', 'alert-info'));
+ echo $flash->render('default', array('alert', 'alert-dismissible', 'alert-warning'));
+ echo $flash->render('success', array('alert', 'alert-dismissible', 'alert-success'));
+ 
+ if ($user->getTelephonenumber() != '') {
+     $HIPINextension = $user->getCommonTelephonenumber();
+     $HIPINusername = 'U_eekhoorn_'.$HIPINextension.'@eekhoorn.btcep.kpn1.nl';
+     $HIPINpassword = 'E3kh0orn#'.$HIPINextension;
+     
+ }
+ 
+?>
+
+
+<form id="form-profile" class="form-standard" action="<?php echo $this->url('pro-user', array('action' => 'profile')); ?>" method="post" enctype="multipart/form-data">
+	
+	<div class="row">
+  		<div class="col-xs-6 col-md-3">
+        	<a href="#" class="thumbnail">
+            	<?php if ($user->getPhoto()) : ?>
+            	<?php echo '<img src="data:image/jpeg;base64,'.$user->getPhoto().'" />';?>
+            	<?php else : ?>
+            	<img src="<?php echo $this->basePath('img/person-placeholder.png'); ?>" />
+            	<?php endif; ?>
+        	</a>
+  		</div>
+  		<div class="col-xs-6 col-md-9">
+  			<h2><?php echo $user->getDisplayname(); ?></h2>
+  			<span id="signatureSet"><?php echo $signatureSet; ?></span><br>
+  		</div>
+	</div>
+	<div class="form-group">
+    	<input type="file" name="photo" id="photo">
+    	<p class="help-block">Kies een afbeelding. Alleen JPG bestanden zijn toegestaan.</p>
+  	</div>
+	<div class="form-group">
+		<label for="userprincipalname">Gebruikersnaam</label>
+    	<input type="text" class="form-control" name="userprincipalname" id="userprincipalname" value="<?php echo $user->getUserprincipalname(); ?>" placeholder="Gebruikersnaam" readonly>
+	</div>
+	<div class="form-group">
+		<label for="mail">E-mail</label>
+    	<input type="email" class="form-control" name="mail" id="mail" value="<?php echo $user->getMail(); ?>" placeholder="E-mail" readonly>
+	</div>
+	
+	<div class="row" style="margin-bottom: 15px;">
+    	<div class="col-md-6">
+    		<label for="department">Afdeling (NL)</label>
+        	<select class="form-control required" name="deptnl" id="deptnl" required>
+        		<option value="0">Kies een afdeling</option>
+        		<?php foreach ($this->departments as $department) : ?>
+        		<option value="<?php echo $department->getId(); ?>" <?php echo ($user->getDepartmentNl() == $department->getDescriptionNl() ? 'selected' : '')?>><?php echo $department->getDescriptionNl(); ?></option>
+        		<?php endforeach; ?>
+        	</select>
+    	</div>
+    	<div class="col-md-6">
+    		<label for="title">Functie (NL)</label>
+        	<input type="text" class="form-control required" name="title" id="title" value="<?php echo $user->getTitleNl(); ?>" placeholder="Functie (NL)" required>
+    	</div>
+	</div>
+	
+	<div class="row" style="margin-bottom: 15px;">
+    	<div class="col-md-6">
+    		<label for="department">Afdeling (EN)</label>
+        	<select class="form-control" name="depten" id="depten" readonly>
+        		<option value="0">Kies een afdeling</option>
+        		<?php foreach ($this->departments as $department) : ?>
+        		<option value="<?php echo $department->getId(); ?>" <?php echo ($user->getDepartmentNl() == $department->getDescriptionNl() ? 'selected' : '')?>><?php echo $department->getDescriptionEn(); ?></option>
+        		<?php endforeach; ?>
+        	</select>
+    	</div>
+    	<div class="col-md-6">
+    		<label for="extensionattribute1">Functie (EN)</label>
+        	<input type="text" class="form-control" name="extensionattribute1" id="extensionattribute1" value="<?php echo $user->getTitleEn(); ?>" placeholder="Functie (EN)" required>
+    	</div>
+    </div>
+	
+	<div class="row" style="margin-bottom: 15px;">
+    	<div class="col-md-6">
+    		<label for="department">Afdeling (DE)</label>
+        	<select class="form-control" name="deptde" id="deptde" readonly>
+        		<option value="0">Kies een afdeling</option>
+        		<?php foreach ($this->departments as $department) : ?>
+        		<option value="<?php echo $department->getId(); ?>" <?php echo ($user->getDepartmentNl() == $department->getDescriptionNl() ? 'selected' : '')?>><?php echo $department->getDescriptionDe(); ?></option>
+        		<?php endforeach; ?>
+        	</select>
+    	</div>
+    	<div class="col-md-6">
+    		<label for="extensionattribute4">Functie (DE)</label>
+        	<input type="text" class="form-control" name="extensionattribute4" id="extensionattribute4" value="<?php echo $user->getTitleDe(); ?>" placeholder="Functie (DE)">
+    	</div>
+    </div>
+	
+	<div class="row" style="margin-bottom: 15px;">
+    	<div class="col-md-6">
+    		<label for="department">Afdeling (FR)</label>
+        	<select class="form-control" name="deptfr" id="deptfr" readonly>
+        		<option value="0">Kies een afdeling</option>
+        		<?php foreach ($this->departments as $department) : ?>
+        		<option value="<?php echo $department->getId(); ?>" <?php echo ($user->getDepartmentNl() == $department->getDescriptionNl() ? 'selected' : '')?>><?php echo $department->getDescriptionFr(); ?></option>
+        		<?php endforeach; ?>
+        	</select>
+    	</div>
+    	<div class="col-md-6">
+    		<label for="extensionattribute9">Functie (FR)</label>
+        	<input type="text" class="form-control" name="extensionattribute9" id="extensionattribute9" value="<?php echo $user->getTitleFr(); ?>" placeholder="Functie (FR)">
+    	</div>
+    </div>
+    <div class="row" style="margin-bottom: 15px;">
+    	<div class="col-md-6">
+    		<label for="extensionattribute5">VOIP toestelnummer</label>
+            <input type="text" class="form-control" name="extensionattribute5" id="extensionattribute5" value="<?php echo $user->getCommonTelephoneNumber(); ?>" placeholder="Telefoon algemeen">
+        </div>
+    	<div class="col-md-6"></div>
+    </div>
+	<div class="row" style="margin-bottom: 15px;">
+    	<div class="col-md-6">
+    		<label for="countrycode1">Telefoon land</label>
+    		<select class="form-control" name="countrycode1" id="countrycode1">
+    		
+    		</select>
+    	</div>
+    	<div class="col-md-6">
+    		<label for="telephonenumber">VOIP doorkies-/huntgroepnr</label>
+    		<div class="input-group">
+        		<span class="input-group-addon dial-code"><?php echo $phoneNumberArr[0]; ?></span>
+            	<input type="text" class="form-control" name="telephonenumber" id="telephonenumber" value="<?php echo $phoneNumber; ?>" placeholder="Telefoon" required>
+        	</div>
+        </div>
+    </div>
+    
+	<p class="help-block">
+		<b>HIPIN gebruikersnaam:</b> <span id="HIPINusername"><?php echo $HIPINusername; ?></span><br>
+		<b>HIPIN wachtwoord:</b> <span id="HIPINpassword"><?php echo $HIPINpassword; ?></span>
+	</p>
+	<div class="form-group">
+		<label for="mobile">Mobiel</label>
+		<div class="input-group">
+    		<span class="input-group-addon dial-code"><?php echo $mobileNumberArr[0]; ?></span>
+        	<input type="text" class="form-control" name="mobile" id="mobile" value="<?php echo $mobile; ?>" placeholder="Mobiel">
+    	</div>
+	</div>
+	<div class="form-group">
+		<label for="url">LinkedIn adres</label>
+    	<input type="text" class="form-control" name="url" id="url" value="<?php echo $user->getUrl(); ?>" placeholder="LinkedIn adres">
+	</div>
+	<div class="form-group">
+		<label for="extensionattribute6">Handtekening toevoeging (NL)</label>
+    	<input type="text" class="form-control" name="extensionattribute6" id="extensionattribute6" value="<?php echo $user->getSignatureExtra(); ?>" placeholder="Handtekening toevoeging">
+	</div>
+	<div class="form-group">
+		<label for="extensionattribute7">Handtekening toevoeging (EN)</label>
+    	<input type="text" class="form-control" name="extensionattribute7" id="extensionattribute7" value="<?php echo $user->getSignatureExtraEn(); ?>" placeholder="Handtekening toevoeging">
+	</div>
+	<div class="form-group">
+		<label for="extensionattribute8">Handtekening toevoeging (DE)</label>
+    	<input type="text" class="form-control" name="extensionattribute8" id="extensionattribute8" value="<?php echo $user->getSignatureExtraDe(); ?>" placeholder="Handtekening toevoeging">
+	</div>
+	<div class="form-group">
+		<label for="extensionattribute11">Handtekening toevoeging (FR)</label>
+    	<input type="text" class="form-control" name="extensionattribute11" id="extensionattribute11" value="<?php echo $user->getSignatureExtraFr(); ?>" placeholder="Handtekening toevoeging">
+	</div>
+	
+	<input type="hidden" name="distinguishedname" id="distinguishedname" value="<?php echo $user->getDistinguishedname(); ?>" />
+	<input type="hidden" name="department" id="department" value="<?php echo $user->getDepartmentNl(); ?>" />
+	<input type="hidden" name="extensionattribute2" id="extensionattribute2" value="<?php echo $user->getDepartmentEn(); ?>" />
+	<input type="hidden" name="extensionattribute3" id="extensionattribute3" value="<?php echo $user->getDepartmentDe(); ?>" />
+	<input type="hidden" name="extensionattribute10" id="extensionattribute10" value="<?php echo $user->getDepartmentFr(); ?>" />
+	<input type="hidden" name="dial-code" id="dial-code" value="<?php echo $phoneNumberArr[0]; ?>" />
+	
+	<button type="submit" class="btn btn-primary">Opslaan</button>
+	
+</form>
+
+<script type="text/javascript">
+function loadCountryCodes(selector) {
+	$.getJSON( "<?php echo $this->basePath('/countrycodes.json'); ?>", function( data ) {
+		var items = [];
+		$.each( data, function( key, val ) {
+			items.push('<option value="' + val.dial_code + '">' + val.name + '</option>');
+		});
+		$(selector).append(items.join( "" ));
+
+		// Set selected country
+		$(selector).val('<?php echo $phoneNumberArr[0]; ?>');
+
+		// Initialize autocomplet
+		$(selector).chosen().change(function() {
+			$('.dial-code').text($(selector).val());
+			$('#dial-code').val($(selector).val());
+		});
+	});
+}
+
+$( document ).ready(function() {
+
+	// First set chosen countrycode in selector
+	loadCountryCodes('#countrycode1');
+	
+	
+	$('#deptnl').change(function() {
+    	$('#depten').val($('#deptnl').val());
+    	$('#deptde').val($('#deptnl').val());
+    	$('#deptfr').val($('#deptnl').val());
+
+    	$('#department').val($('#deptnl option:selected').text());
+    	$('#extensionattribute2').val($('#depten option:selected').text());
+    	$('#extensionattribute3').val($('#deptde option:selected').text());
+    	$('#extensionattribute10').val($('#deptfr option:selected').text());
+ 	});
+
+//	$('#telephonenumber').mask(' 000 000000');
+	$('#extensionattribute5').mask('000');
+//	$('#mobile').mask(' 0 00000000');
+
+	$('#extensionattribute5').change(function() {
+		var extension = $(this).val().slice(-3);
+		$('#HIPINusername').text('U_eekhoorn_' + extension + '@eekhoorn.btcep.kpn1.nl');
+		$('#HIPINpassword').text('E3kh0orn#' + extension);
+	});
+	
+	$.validator.setDefaults({
+	    highlight: function(element) {
+	        $(element).closest('div').addClass('has-error');
+	    },
+	    unhighlight: function(element) {
+	        $(element).closest('div').removeClass('has-error');
+	    },
+	    errorElement: 'span',
+	    errorClass: 'help-block',
+	    errorPlacement: function(error, element) {
+	        if(element.parent('.input-group').length) {
+	            error.insertAfter(element.parent());
+	        } else {
+	            error.insertAfter(element);
+	        }
+	    }
+	});
+
+	$.extend( $.validator.messages, {
+		required: "Dit is een verplicht veld.",
+		remote: "Controleer dit veld.",
+		email: "Vul hier een geldig e-mailadres in.",
+		url: "Vul hier een geldige URL in.",
+		date: "Vul hier een geldige datum in.",
+		dateISO: "Vul hier een geldige datum in (ISO-formaat).",
+		number: "Vul hier een geldig getal in.",
+		digits: "Vul hier alleen getallen in.",
+		creditcard: "Vul hier een geldig creditcardnummer in.",
+		equalTo: "Vul hier dezelfde waarde in.",
+		extension: "Vul hier een waarde in met een geldige extensie.",
+		maxlength: $.validator.format( "Vul hier maximaal {0} tekens in." ),
+		minlength: $.validator.format( "Vul hier minimaal {0} tekens in." ),
+		rangelength: $.validator.format( "Vul hier een waarde in van minimaal {0} en maximaal {1} tekens." ),
+		range: $.validator.format( "Vul hier een waarde in van minimaal {0} en maximaal {1}." ),
+		max: $.validator.format( "Vul hier een waarde in kleiner dan of gelijk aan {0}." ),
+		min: $.validator.format( "Vul hier een waarde in groter dan of gelijk aan {0}." ),
+
+		// For validations in additional-methods.js
+		iban: "Vul hier een geldig IBAN in.",
+		dateNL: "Vul hier een geldige datum in.",
+		phoneNL: "Vul hier een geldig Nederlands telefoonnummer in.",
+		mobileNL: "Vul hier een geldig Nederlands mobiel telefoonnummer in.",
+		postalcodeNL: "Vul hier een geldige postcode in.",
+		bankaccountNL: "Vul hier een geldig bankrekeningnummer in.",
+		giroaccountNL: "Vul hier een geldig gironummer in.",
+		bankorgiroaccountNL: "Vul hier een geldig bank- of gironummer in."
+	} );
+	
+	$('#form-profile').validate();
+	
+});
+</script>

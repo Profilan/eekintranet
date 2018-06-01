@@ -1,0 +1,24 @@
+<h1>Afdelingen</h1>
+<p>
+    <a href="<?php echo $this->url('pro-department', array('action'=>'add'))?>">Nieuwe afdeling toevoegen</a>
+</p>
+
+<table class="table">
+<tr>
+    <th>Omschrijving</th>
+    <th>Handtekeningenset</th>
+    <th>&nbsp;</th>
+</tr>
+<?php foreach ($this->departments as $department) : ?>
+<tr>
+    <td><?php echo $this->escapeHtml($department->getDescriptionNl()); ?></td>
+    <td><?php echo $this->escapeHtml($department->getSignatureSet()); ?></td>
+    <td>
+        <a href="<?php echo $this->url('pro-department',
+             array('action'=>'edit', 'id' => $department->getId()));?>">Bewerken</a>
+         <a href="<?php echo $this->url('pro-department',
+             array('action'=>'delete', 'id' => $department->getId()));?>">Verwijderen</a>
+    </td>
+</tr>
+<?php endforeach; ?>
+</table>
